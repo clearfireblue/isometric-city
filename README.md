@@ -1,78 +1,77 @@
-# IsoCity & IsoCoaster — Single-Player Edition
+# Goblin Hollow
 
-A single-player-only fork of [amilich/isometric-city](https://github.com/amilich/isometric-city), the open-source isometric city and theme park builder built with NextJS, TypeScript, and HTML5 Canvas.
-
-**What's different from the original:** all co-op multiplayer has been removed — the Co-op buttons, invite/share-room dialogs, `/coop/...` routes, room sync hooks, and the Supabase dependency. Everything runs locally in the browser and saves to localStorage; no accounts, servers, or environment variables are needed. The "copy share link" feature (which encodes your city into the URL) is kept, since it doesn't need a server.
+A cozy isometric community sim. You lay out a hillside village (burrows, huts, mushroom patches, cookfires, paths and lanterns) and a little band of goblins lives in it: they get hungry, sleepy, lonely and bored, and decide for themselves how to look after each other.
 
 <table>
 <tr>
-<td width="50%" align="center"><strong>IsoCity</strong></td>
-<td width="50%" align="center"><strong>IsoCoaster</strong></td>
+<td width="50%"><img src="public/readme-hollow.png" width="100%"></td>
+<td width="50%"><img src="public/readme-night.png" width="100%"></td>
 </tr>
 <tr>
-<td><img src="public/readme-image.png" width="100%"></td>
-<td><img src="public/readme-coaster.png" width="100%"></td>
-</tr>
-<tr>
-<td align="center">City builder with trains, planes, cars, and pedestrians<br><a href="https://iso-city.com">iso-city.com</a></td>
-<td align="center">Theme park builder with roller coasters, rides, and guests<br><a href="https://iso-coaster.com">iso-coaster.com</a></td>
+<td align="center">Burrows dug into the hill, a stew pot on the go</td>
+<td align="center">Lanterns and the cookfire after dark</td>
 </tr>
 </table>
 
-Made with [Cursor](https://cursor.com).
+Built on the scaffold of [IsoCity](https://github.com/amilich/isometric-city) (Next.js, TypeScript, HTML5 Canvas). The city and theme-park games have been removed; the Next.js shell, UI kit and isometric approach remain.
 
-## Features
+## Playing
 
--   **Isometric Rendering Engine**: Rendering with HTML5 Canvas (`CanvasIsometricGrid`) capable of handling complex depth sorting, layer management, and both image and canvas sprites.
--   **Dynamic Simulation**:
-    -   **Traffic System**: Autonomous vehicles including cars, trains, planes, buses, and seaplanes.
-    -   **Trains, bridges, buses, barges, and more**: Vehicles will navigate throughout your city and respect traffic lights.
-    -   **Pedestrian System**: Pathfinding and crowd simulation for city inhabitants.
-    -   **Economy & Resources**: Resource management, zoning (Residential, Commercial, Industrial), and city growth logic.
--   **Interactive Grid**: Tile-based placement system for buildings, roads, rail, parks, utilities, and more.
--   **State Management**: Save and load functionality for multiple cities.
--   **Responsive Design**: Mobile-friendly interface with touch friendly controls, drawers, and toolbars.
+- **Inspect** (default): click a goblin or building to see what's going on; drag to pan, scroll or pinch to zoom.
+- **Build**: pick something from the bar at the bottom and click a tile. Goblins come and build it themselves.
+  - *Homes*: **Burrow** (must be dug into a hill, sleeps 3) and **Thatch Hut** (flat ground, sleeps 2).
+  - *Food*: **Mushroom Patch**, **Berry Bush**, **Cookfire** (goblins cook stew here and eat together) and **Larder Stump** (+40 storage).
+  - *Paths & Decor*: **Dirt Path** (faster walking, drag to paint), **Lantern**, **Flower Bed**, **Picket Fence**.
+- **Clear**: remove trees, rocks, paths or buildings.
+- Keys: `Space` pause · `1` `2` `3` speed · `WASD`/arrows pan · `Esc` back to inspect.
 
-## Tech Stack
+The hollow autosaves to your browser every 20 seconds. **New hollow** generates a fresh map from a new seed.
 
--   **Framework**: [Next.js 16](https://nextjs.org/)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Graphics**: HTML5 Canvas (No external game engine libraries; pure native implementation).
--   **Icons**: Lucide React icons.
+## How the goblins work
 
-## Getting Started
+Each goblin has four needs — **Fed**, **Rested**, **Company** and **Fun** — that drain over the day. Every so often a goblin scores what it could do and picks the most pressing thing:
 
-### Prerequisites
+| Need | What they do about it |
+| --- | --- |
+| Fed | Eat stew at a cookfire (best, and social), raw food from the larder, or forage for grubs if the stores are bare |
+| Rested | Sleep at home (snug) or on the ground (cold and grumpy), mostly at night |
+| Company | Wander over to another goblin for a natter |
+| Fun | Cloud-watch from a hilltop, paddle in the stream, smell flowers, nap in the sun, or bask by lanterns at night |
+| *(village)* | Build blueprints, harvest ripe crops, haul food to larders, cook stew |
 
--   Node.js (v18 or higher)
--   npm
+**Mood** blends their needs with short-lived *moodlets* ("Ate a warm bowl of stew +6", "Slept on the cold ground −8", "Lives somewhere lovely +3"). Happier goblins walk and work faster; miserable ones go off to sulk. If the village is content, has spare beds and food, new goblins wander in each morning.
 
-### Installation
+## Code map
 
-1.  **Clone the repository**
-    ```bash
-    git clone <your-repo-url>
-    cd isometric-city-solo
-    ```
+```
+src/games/goblins/      simulation & rendering (no React)
+  catalog.ts            buildings, tiles, timing constants, placement rules
+  worldgen.ts           seeded hillside map: hills, stream & fords, woods, meadows
+  goblin.ts, names.ts   procedural goblins (looks + names)
+  sim.ts                Hollow engine: needs, moodlets, utility-AI decisions, jobs
+  pathfinding.ts        A* over tiles (paths cheap, fords slow, cliffs blocked)
+  render.ts             canvas renderer: terrain, buildings, goblins, day/night light
+  save.ts               localStorage save (lz-string compressed)
+src/components/goblins/ React UI: canvas host, input, HUD panels
+```
 
-2.  **Install dependencies**
-    ```bash
-    npm install
-    ```
+In the browser console, `goblinHollow()` returns the live engine for tinkering.
 
-3.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
+## Roadmap
 
-4.  **Open the game**
-    Visit [http://localhost:3000](http://localhost:3000) to play IsoCity. 
-    Visit [http://localhost:3000/coaster](http://localhost:3000/coaster) for IsoCoaster.
+- **Phase 1 — the hollow lives** ✅ terrain, building, needs & mood, day/night, saves
+- **Phase 2 — who they are**: stats, personality traits, skills/jobs, aging
+- **Phase 3 — who they love**: friendships, rivalries, romance, families
+- **Phase 4 — the chronicle**: life events and character development as a readable story
+- **Phase 5 — polish**: seasons, festivals, sound, more buildings
 
-## Contributing
+## Development
 
-Contributions, bug reports, and feature requests are welcome.
+```bash
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # production build (also type-checks)
+npm run lint
+```
 
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+MIT licensed (see `LICENSE`), as is the IsoCity scaffold it grew from.
